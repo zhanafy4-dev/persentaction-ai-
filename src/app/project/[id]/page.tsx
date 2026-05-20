@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { ScrollSequence } from "@/components/cinematic/ScrollSequence";
+import { VideoRenderPanel } from "@/components/VideoRenderPanel";
 import { ProjectEditor } from "./ui/ProjectEditor";
 
 export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
@@ -71,7 +72,22 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
       <div className="h-20 sm:h-24" />
 
-      <div className="mx-auto w-full max-w-6xl px-6 py-10">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-10">
+        <VideoRenderPanel
+          projectId={project.id}
+          projectTitle={project.title}
+          initialJob={
+            project.renders[0]
+              ? {
+                  id: project.renders[0].id,
+                  status: project.renders[0].status,
+                  progress: project.renders[0].progress,
+                  format: project.renders[0].format,
+                  errorMessage: project.renders[0].errorMessage,
+                }
+              : null
+          }
+        />
         <ProjectEditor
           projectId={project.id}
           title={project.title}

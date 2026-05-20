@@ -15,6 +15,19 @@ export async function serveStorageObject(
 ) {
   const remoteUrl = await driver.getPublicUrl(key, headers.attachment ? { attachment: true } : undefined);
   if (remoteUrl) {
+    // Proxy through our API so the browser triggers a real file download (Cloudinary CORS-safe).
+    if (headers.contentDisposition) {
+      const res = await fetch(remoteUrl);
+      if (!res.ok) return NextResponse.json({ error: "Missing file" }, { status: 404 });
+      const h: Record<string, string> = {
+        "content-type": res.headers.get("content-type") ?? contentTypeFromKey(key),
+        "cache-control": headers.cacheControl,
+        "content-disposition": headers.contentDisposition,
+      };
+      const len = res.headers.get("content-length");
+      if (len) h["content-length"] = len;
+      return new Response(res.body, { headers: h });
+    }
     return NextResponse.redirect(remoteUrl, {
       status: 302,
       headers: { "cache-control": headers.cacheControl },

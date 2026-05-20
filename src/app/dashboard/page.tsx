@@ -61,14 +61,6 @@ export default async function DashboardPage() {
                       {latestRender ? `${latestRender.status} (${latestRender.progress}%)` : "none"}
                     </span>
                   </div>
-                  {latestRender?.status === "done" && (
-                    <a
-                      href={`/api/renders/${latestRender.id}`}
-                      className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 hover:bg-white/10"
-                    >
-                      Download
-                    </a>
-                  )}
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -80,9 +72,12 @@ export default async function DashboardPage() {
                   </Link>
                   <DashboardActions
                     projectId={p.id}
+                    projectTitle={p.title}
                     shareToken={share?.token ?? null}
                     latestRenderId={latestRender?.id ?? null}
                     latestRenderStatus={latestRender?.status ?? null}
+                    latestRenderProgress={latestRender?.progress ?? 0}
+                    latestRenderFormat={latestRender?.format ?? "mp4"}
                   />
                 </div>
               </div>
