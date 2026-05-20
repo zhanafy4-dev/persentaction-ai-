@@ -3,6 +3,9 @@ import { prisma } from "@/lib/db";
 import { serveStorageObject } from "@/lib/storage/serve";
 import { uploadsStorage } from "@/lib/storage/storage";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 export async function GET(_: Request, ctx: { params: Promise<{ token: string; imageId: string }> }) {
   const { token, imageId } = await ctx.params;
   const link = await prisma.shareLink.findUnique({

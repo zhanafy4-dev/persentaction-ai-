@@ -5,6 +5,9 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { uploadsStorage } from "@/lib/storage/storage";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 function extFromMime(type: string) {
   if (type === "image/jpeg") return "jpg";
   if (type === "image/png") return "png";

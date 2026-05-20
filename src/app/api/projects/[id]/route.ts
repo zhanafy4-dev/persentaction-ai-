@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 async function assertOwner(projectId: string, userId: string) {
   const p = await prisma.project.findUnique({ where: { id: projectId } });
   if (!p || p.userId !== userId) return null;

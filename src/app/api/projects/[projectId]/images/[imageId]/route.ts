@@ -4,6 +4,9 @@ import { requireUser } from "@/lib/session";
 import { serveStorageObject } from "@/lib/storage/serve";
 import { uploadsStorage } from "@/lib/storage/storage";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 export async function GET(_: Request, ctx: { params: Promise<{ projectId: string; imageId: string }> }) {
   const u = await requireUser();
   if (!u) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

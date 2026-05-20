@@ -44,7 +44,7 @@ export function DashboardActions({
 
   const poll = useCallback(async () => {
     if (!job?.id) return;
-    const res = await fetch(`/api/render?jobId=${job.id}`);
+    const res = await fetch(`/api/render?jobId=${job.id}`, { credentials: "include" });
     if (!res.ok) return;
     const data = (await res.json()) as { job: RenderJob };
     if (data.job) setJob(data.job);
@@ -72,7 +72,7 @@ export function DashboardActions({
     try {
       const safeName = projectTitle.replace(/[^a-z0-9-_]+/gi, "-") || "video";
       const filename = `${safeName}.${job.format}`;
-      const res = await fetch(`/api/renders/${job.id}`);
+      const res = await fetch(`/api/renders/${job.id}`, { credentials: "include" });
       if (!res.ok) throw new Error("Download failed");
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -101,6 +101,7 @@ export function DashboardActions({
             const res = await fetch("/api/render", {
               method: "POST",
               headers: { "content-type": "application/json" },
+              credentials: "include",
               body: JSON.stringify({ projectId, format: "mp4" }),
             });
             if (res.ok) {
@@ -120,6 +121,7 @@ export function DashboardActions({
             const res = await fetch("/api/render", {
               method: "POST",
               headers: { "content-type": "application/json" },
+              credentials: "include",
               body: JSON.stringify({ projectId, format: "webm" }),
             });
             if (res.ok) {

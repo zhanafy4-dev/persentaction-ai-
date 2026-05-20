@@ -1,24 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-
-function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const t = setTimeout(() => reject(new Error(message)), ms);
-    promise.then(
-      (v) => {
-        clearTimeout(t);
-        resolve(v);
-      },
-      (e) => {
-        clearTimeout(t);
-        reject(e instanceof Error ? e : new Error(String(e)));
-      },
-    );
-  });
-}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,33 +18,28 @@ export default function LoginPage() {
     setBusy(true);
     try {
       if (mode === "signup") {
-        const res = await withTimeout(
-          fetch("/api/signup", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ email, password }),
-          }),
-          25_000,
-          "Signup timed out — check DATABASE_URL on Railway.",
-        );
-        if (!res.ok) {
-          const j = (await res.json().catch(() => null)) as { error?: string } | null;
-          throw new Error(j?.error ?? `Signup failed (${res.status})`);
+        const signupRes = await fetch("/api/signup", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        const signupBody = (await signupRes.json().catch(() => null)) as { error?: string } | null;
+        if (!signupRes.ok) {
+          throw new Error(signupBody?.error ?? `Signup failed (${signupRes.status})`);
         }
       }
 
-      const out = await withTimeout(
-        signIn("credentials", { email, password, redirect: false }),
-        25_000,
-        "Login timed out — check NEXTAUTH_SECRET and NEXTAUTH_URL on Railway.",
-      );
-      if (!out?.ok || out?.error) {
-        throw new Error(
-          out?.error === "CredentialsSignin"
-            ? "Wrong email or password."
-            : (out?.error ?? "Login failed"),
-        );
+      const loginRes = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email, password }),
+        credentials: "include",
+      });
+      const loginBody = (await loginRes.json().catch(() => null)) as { error?: string; ok?: boolean } | null;
+      if (!loginRes.ok) {
+        throw new Error(loginBody?.error ?? `Login failed (${loginRes.status})`);
       }
+
       router.push("/dashboard");
       router.refresh();
     } catch (err) {
@@ -75,8 +53,12 @@ export default function LoginPage() {
     <div className="min-h-screen w-full px-6 py-16 flex items-center justify-center">
       <div className="glass-strong w-full max-w-md rounded-3xl p-8">
         <div className="text-xs tracking-[0.24em] text-white/60">CINEMATIC STORY</div>
-        <h1 className="mt-2 text-2xl font-semibold text-white">{mode === "login" ? "Login" : "Create account"}</h1>
-        <p className="mt-2 text-sm text-white/70">Email/password — stored in Postgres.</p>
+        <h1 className="mt-2 text-2xl font-semibold text-white">
+          {mode === "login" ? "تسجيل الدخول" : "إنشاء حساب"}
+        </h1>
+        <p className="mt-2 text-sm text-white/70">
+          بعد الدخول: لوحة التحكم → مشروع → Render MP4 → تحميل الفيديو.
+        </p>
 
         <form className="mt-6 flex flex-col gap-3" onSubmit={(ev) => void onSubmit(ev)}>
           <input
@@ -91,7 +73,7 @@ export default function LoginPage() {
           <input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password (min 8 chars)"
+            placeholder="Password (8+ chars)"
             type="password"
             autoComplete={mode === "signup" ? "new-password" : "current-password"}
             minLength={8}
@@ -99,14 +81,18 @@ export default function LoginPage() {
             className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/85 outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent0)] gpu"
           />
 
-          {error && <div className="text-sm text-red-300">{error}</div>}
+          {error && (
+            <div className="rounded-xl border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+              {error}
+            </div>
+          )}
 
           <button
             type="submit"
             disabled={busy}
             className="mt-2 rounded-full bg-[linear-gradient(90deg,var(--accent0),var(--accent1))] px-6 py-3 text-sm font-semibold text-black disabled:opacity-50 gpu"
           >
-            {busy ? "Working…" : mode === "login" ? "Login" : "Sign up"}
+            {busy ? "جاري التحميل…" : mode === "login" ? "دخول" : "إنشاء حساب"}
           </button>
 
           <button
@@ -118,9 +104,16 @@ export default function LoginPage() {
             }}
             className="rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm text-white/80 disabled:opacity-50 gpu"
           >
-            {mode === "login" ? "Create account" : "I already have an account"}
+            {mode === "login" ? "مستخدم جديد؟ إنشاء حساب" : "لدي حساب — تسجيل دخول"}
           </button>
         </form>
+
+        <p className="mt-4 text-center text-xs text-white/50">
+          مشكلة؟ افتح{" "}
+          <a href="/api/health" className="underline" target="_blank" rel="noreferrer">
+            /api/health
+          </a>
+        </p>
       </div>
     </div>
   );

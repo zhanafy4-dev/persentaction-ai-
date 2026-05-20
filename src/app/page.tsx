@@ -205,15 +205,23 @@ export default function UploadPage() {
               <div className="text-xs text-[color:var(--fg1)]">
                 Tip: more images = richer storytelling. The engine auto-builds transitions and depth.
               </div>
-              <motion.button
-                type="button"
-                disabled={!canStart}
-                whileTap={canStart ? { scale: 0.98 } : undefined}
-                onClick={() => void onGenerate()}
-                className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(90deg,var(--accent0),var(--accent1))] px-6 py-3 text-sm font-semibold text-black shadow-[0_18px_55px_rgba(124,92,255,0.25)] disabled:cursor-not-allowed disabled:opacity-40 gpu"
-              >
-                Generate cinematic presentation
-              </motion.button>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <motion.button
+                  type="button"
+                  disabled={!canStart}
+                  whileTap={canStart ? { scale: 0.98 } : undefined}
+                  onClick={() => void onGenerate()}
+                  className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(90deg,var(--accent0),var(--accent1))] px-6 py-3 text-sm font-semibold text-black shadow-[0_18px_55px_rgba(124,92,255,0.25)] disabled:cursor-not-allowed disabled:opacity-40 gpu"
+                >
+                  معاينة سريعة (بدون حساب)
+                </motion.button>
+                <Link
+                  href="/login"
+                  className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/8 px-6 py-3 text-sm font-medium text-white/90 gpu"
+                >
+                  حساب + فيديو للتحميل →
+                </Link>
+              </div>
             </div>
           </div>
         </div>
