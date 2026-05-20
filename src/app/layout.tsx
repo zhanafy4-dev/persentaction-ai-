@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { AppNav } from "@/components/AppNav";
 import { Providers } from "@/components/Providers";
+import { SiteChrome } from "@/components/SiteChrome";
 import { SmoothContainer } from "@/components/cinematic/SmoothContainer";
 
 const geistSans = Geist({
@@ -32,8 +32,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <Providers>
-          <AppNav />
-          <SmoothContainer>{children}</SmoothContainer>
+          <SiteChrome>
+            <SmoothContainer>{children}</SmoothContainer>
+          </SiteChrome>
         </Providers>
       </body>
     </html>

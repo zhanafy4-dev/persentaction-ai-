@@ -1,9 +1,14 @@
 "use client";
 
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { DynamicPresentation } from "@/components/presentation-engine/DynamicPresentation";
 import { ensureGsap } from "@/lib/gsap";
+import type { PresentationImage } from "@/presentation-engine/types";
 import { MotionOverlay } from "./MotionOverlay";
 import { CinematicImage } from "./CinematicImage";
+
+export type { PresentationImage };
+export type ScrollSequenceVariant = "classic" | "dynamic";
 
 /**
  * Presentation-style autoplay:
@@ -15,31 +20,34 @@ const HOLD_RATIO = 3.2;
 const HOLD_DURATION = Number((CROSS_DURATION * HOLD_RATIO).toFixed(2));
 const LOOP_GAP = Number((CROSS_DURATION * 1.1).toFixed(2));
 
-function labelFromName(name: string) {
-  const base = name.replace(/\.[^/.]+$/, "");
-  return base.length > 0 ? base : name;
-}
-
-export type PresentationImage = {
-  id: string;
-  name: string;
-  dataUrl: string;
-  description?: string;
-};
+const PLACEHOLDER_COPY = "اكتب وصف للصورة من صفحة الرفع علشان يظهر هنا جنبها.";
 
 type SlideCopy = { eyebrow: string; title: string; subtitle?: string };
 
 function buildCopy(images: PresentationImage[]): SlideCopy[] {
-  return images.map((img, i) => ({
-    eyebrow: `SLIDE ${String(i + 1).padStart(2, "0")}`,
-    title: labelFromName(img.name),
-    subtitle: img.description?.trim()
-      ? img.description.trim()
-      : "اكتب وصف للصورة من صفحة الرفع علشان يظهر هنا جنبها.",
-  }));
+  return images.map((img, i) => {
+    const desc = img.description?.trim();
+    return {
+      eyebrow: `SLIDE ${String(i + 1).padStart(2, "0")}`,
+      title: desc || PLACEHOLDER_COPY,
+    };
+  });
 }
 
-export function ScrollSequence({ images }: { images: PresentationImage[] }) {
+export function ScrollSequence({
+  images,
+  variant = "classic",
+}: {
+  images: PresentationImage[];
+  variant?: ScrollSequenceVariant;
+}) {
+  if (variant === "dynamic") {
+    return <DynamicPresentation images={images} />;
+  }
+  return <ClassicScrollSequence images={images} />;
+}
+
+function ClassicScrollSequence({ images }: { images: PresentationImage[] }) {
   const copy = useMemo(() => buildCopy(images), [images]);
   const [visibleIndex, setVisibleIndex] = useState(0);
 
@@ -101,18 +109,17 @@ export function ScrollSequence({ images }: { images: PresentationImage[] }) {
 
       // Seed initial sources
       imgR.src = images[0]?.dataUrl ?? "";
-      imgR.alt = images[0]?.name ?? "";
+      imgR.alt = images[0]?.description?.trim() || "Slide 1";
       imgL.src = images[1]?.dataUrl ?? images[0]?.dataUrl ?? "";
-      imgL.alt = images[1]?.name ?? images[0]?.name ?? "";
+      imgL.alt = images[1]?.description?.trim() || images[0]?.description?.trim() || "Slide 2";
 
       const fillText = (node: HTMLElement, idx: number) => {
         const m = copy[idx] ?? copy[0];
-        const img = images[idx];
         const eye = node.querySelector<HTMLElement>("[data-eye]");
         const title = node.querySelector<HTMLElement>("[data-title]");
         const sub = node.querySelector<HTMLElement>("[data-sub]");
         if (eye) eye.textContent = m.eyebrow;
-        if (title) title.textContent = m.title || labelFromName(img?.name ?? "");
+        if (title) title.textContent = m.title ?? "";
         if (sub) sub.textContent = m.subtitle ?? "";
       };
 
@@ -157,11 +164,11 @@ export function ScrollSequence({ images }: { images: PresentationImage[] }) {
           setVisibleIndex(idx);
           if (side === "R") {
             imgR.src = images[idx]?.dataUrl ?? "";
-            imgR.alt = images[idx]?.name ?? "";
+            imgR.alt = images[idx]?.description?.trim() || `Slide ${idx + 1}`;
             fillText(textL, idx);
           } else {
             imgL.src = images[idx]?.dataUrl ?? "";
-            imgL.alt = images[idx]?.name ?? "";
+            imgL.alt = images[idx]?.description?.trim() || `Slide ${idx + 1}`;
             fillText(textR, idx);
           }
         }, [], crossStart);
@@ -230,8 +237,8 @@ export function ScrollSequence({ images }: { images: PresentationImage[] }) {
             <div className="absolute inset-0 opacity-[0.07] mix-blend-overlay [background-image:repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,255,255,0.04)_2px,rgba(255,255,255,0.04)_3px)]" />
           </div>
 
-          <div className="pointer-events-none relative z-10 flex min-h-dvh flex-col px-4 pb-10 pt-24 sm:px-8 md:pb-14">
-            <div className="flex shrink-0 justify-end gap-2 pointer-events-auto">
+          <div className="pointer-events-none relative z-10 flex min-h-dvh flex-col px-4 pb-10 pt-6 sm:px-8 md:pb-14">
+            <div className="flex shrink-0 flex-wrap justify-end gap-2 pointer-events-auto">
               <button type="button" onClick={togglePlay} className="rounded-full border border-white/15 bg-black/40 px-4 py-2 text-xs font-medium text-white/90 backdrop-blur-md transition-colors hover:bg-white/10 gpu">
                 إيقاف / تشغيل
               </button>
@@ -261,7 +268,7 @@ export function ScrollSequence({ images }: { images: PresentationImage[] }) {
                       style={{ transform: "translateZ(0)" }}
                     >
                       <div className="absolute inset-0 overflow-hidden rounded-[inherit]">
-                        <CinematicImage ref={imgRRef} src={images[0]?.dataUrl ?? ""} alt={images[0]?.name ?? ""} priority className="opacity-100 object-cover" />
+                        <CinematicImage ref={imgRRef} src={images[0]?.dataUrl ?? ""} alt={images[0]?.description?.trim() || "Slide 1"} priority className="opacity-100 object-cover" />
                         <div ref={overlayRRef} className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(255,255,255,0.05),transparent_58%)] opacity-65 gpu-opacity" />
                         <MotionOverlay />
                       </div>
@@ -280,7 +287,7 @@ export function ScrollSequence({ images }: { images: PresentationImage[] }) {
                       style={{ transform: "translateZ(0)" }}
                     >
                       <div className="absolute inset-0 overflow-hidden rounded-[inherit]">
-                        <CinematicImage ref={imgLRef} src={images[1]?.dataUrl ?? images[0]?.dataUrl ?? ""} alt={images[1]?.name ?? images[0]?.name ?? ""} priority className="opacity-100 object-cover" />
+                        <CinematicImage ref={imgLRef} src={images[1]?.dataUrl ?? images[0]?.dataUrl ?? ""} alt={images[1]?.description?.trim() || images[0]?.description?.trim() || "Slide 2"} priority className="opacity-100 object-cover" />
                         <div ref={overlayLRef} className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(255,255,255,0.05),transparent_58%)] opacity-65 gpu-opacity" />
                         <MotionOverlay />
                       </div>

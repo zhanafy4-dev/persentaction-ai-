@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { ScrollSequence } from "@/components/cinematic/ScrollSequence";
+import { PageToolbar, ToolbarLink } from "@/components/PageToolbar";
 import { VideoRenderPanel } from "@/components/VideoRenderPanel";
 import { ProjectEditor } from "./ui/ProjectEditor";
 
@@ -45,34 +46,15 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="min-h-screen w-full">
-      <div className="fixed left-0 right-0 top-0 z-50">
-        <div className="mx-auto w-full max-w-6xl px-4 pt-4 sm:px-8">
-          <div className="glass flex items-center justify-between gap-3 rounded-2xl px-4 py-3">
-            <div className="flex flex-col leading-tight">
-              <div className="text-sm font-semibold text-white">{project.title}</div>
-              <div className="text-[11px] text-white/65">{project.images.length} images</div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Link
-                href="/dashboard"
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-white/80 transition-colors hover:bg-white/8 gpu"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/"
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-white/80 transition-colors hover:bg-white/8 gpu"
-              >
-                Upload
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageToolbar title={project.title} subtitle={`${project.images.length} images`}>
+        <ToolbarLink href="/dashboard">لوحة التحكم</ToolbarLink>
+        <ToolbarLink href="/">رفع صور</ToolbarLink>
+        <ToolbarLink href="/login" primary>
+          Login
+        </ToolbarLink>
+      </PageToolbar>
 
-      <div className="h-20 sm:h-24" />
-
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-10">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-8 sm:py-10">
         <VideoRenderPanel
           projectId={project.id}
           projectTitle={project.title}
@@ -95,7 +77,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         />
       </div>
 
-      <ScrollSequence images={imagesForPreview} />
+      <ScrollSequence images={imagesForPreview} variant="dynamic" />
     </div>
   );
 }
