@@ -1,16 +1,37 @@
 "use client";
 
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+type Me = { id: string; email: string } | null;
 
 export function AppNav() {
-  const { data: session, status } = useSession();
   const router = useRouter();
-  const loggedIn = status === "authenticated" && !!session?.user;
+  const [user, setUser] = useState<Me | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((r) => r.json())
+      .then((data: { user: Me }) => {
+        if (alive) setUser(data.user ?? null);
+      })
+      .catch(() => {
+        if (alive) setUser(null);
+      })
+      .finally(() => {
+        if (alive) setLoaded(true);
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+    setUser(null);
     router.push("/login");
     router.refresh();
   }
@@ -18,15 +39,13 @@ export function AppNav() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3">
-        <Link href="/" className="text-sm font-semibold tracking-wide text-white/90 gpu">
+        <Link href="/dashboard" className="text-sm font-semibold tracking-wide text-white/90 gpu">
           Cinematic Story
         </Link>
         <nav className="flex items-center gap-2 sm:gap-3">
-          {loggedIn ? (
+          {loaded && user ? (
             <>
-              <span className="hidden max-w-[140px] truncate text-xs text-white/60 sm:inline">
-                {session?.user?.email}
-              </span>
+              <span className="hidden max-w-[160px] truncate text-xs text-white/60 sm:inline">{user.email}</span>
               <Link
                 href="/dashboard"
                 className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/80 transition-colors hover:bg-white/10 sm:text-sm"

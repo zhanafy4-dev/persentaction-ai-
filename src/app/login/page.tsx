@@ -40,8 +40,7 @@ export default function LoginPage() {
         throw new Error(loginBody?.error ?? `Login failed (${loginRes.status})`);
       }
 
-      router.push("/dashboard");
-      router.refresh();
+      window.location.href = "/dashboard";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {

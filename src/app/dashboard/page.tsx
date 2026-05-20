@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { DashboardActions } from "./ui/DashboardActions";
+import { NewProjectButton } from "./ui/NewProjectButton";
 
 export default async function DashboardPage() {
   const u = await requireUser();
@@ -37,13 +38,14 @@ export default async function DashboardPage() {
             <h1 className="mt-2 text-3xl font-semibold text-white">Your projects</h1>
             <p className="mt-2 text-sm text-white/70">Render MP4/WebM with FFmpeg jobs and manage share links.</p>
           </div>
-          <Link
-            href="/"
-            className="rounded-full bg-[linear-gradient(90deg,var(--accent0),var(--accent1))] px-6 py-3 text-sm font-semibold text-black gpu"
-          >
-            New project
-          </Link>
+          <NewProjectButton />
         </div>
+
+        {projects.length === 0 && (
+          <p className="mt-6 text-sm text-white/60">
+            لا يوجد مشاريع بعد. اضغط <strong className="text-white">مشروع جديد</strong> لرفع الصور وتصدير الفيديو.
+          </p>
+        )}
 
         <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((p) => {
