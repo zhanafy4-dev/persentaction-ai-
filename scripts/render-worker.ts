@@ -1,8 +1,11 @@
 import "dotenv/config";
 import { prisma } from "@/lib/db";
+import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import crypto from "node:crypto";
+import { contentTypeFromKey } from "@/lib/storage/contentType";
 import { rendersStorage, uploadsStorage } from "@/lib/storage/storage";
 
 type JobWithProject = Awaited<ReturnType<typeof prisma.renderJob.findFirst>> & {
@@ -53,10 +56,9 @@ async function buildFfmpegArgs(job: JobWithProject) {
   const seg = hold + cross;
   const total = images.length * seg + 0.8;
 
-  // Input list: each image as looped input
   const args: string[] = ["-y"];
   for (const img of images) {
-    const p = uploadsStorage.resolvePath(img.storageKey);
+    const p = await uploadsStorage.materializeLocal(img.storageKey);
     args.push("-loop", "1", "-t", String(seg), "-i", p);
   }
 
@@ -100,14 +102,9 @@ async function buildFfmpegArgs(job: JobWithProject) {
   const outId = crypto.randomUUID();
   const ext = job.format === "webm" ? "webm" : "mp4";
   const outKey = path.join(job.project.userId, job.project.id, `${outId}.${ext}`).replace(/\\/g, "/");
-  const outPath = rendersStorage.resolvePath(outKey);
-
-  await (async () => {
-    // ensure renders dir exists
-    // LocalStorageDriver will create directories on putFile, but here we write directly with ffmpeg.
-    const dir = path.dirname(outPath);
-    await import("node:fs/promises").then((m) => m.mkdir(dir, { recursive: true }));
-  })();
+  const tmpDir = path.join(os.tmpdir(), "cinematic-story", "renders", job.id);
+  await fs.mkdir(tmpDir, { recursive: true });
+  const outPath = path.join(tmpDir, `output.${ext}`);
 
   if (job.format === "webm") {
     args.push("-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "32");
@@ -120,11 +117,11 @@ async function buildFfmpegArgs(job: JobWithProject) {
 
   args.push(outPath);
 
-  return { args, outKey, totalSeconds: total };
+  return { args, outKey, outPath, tmpDir, totalSeconds: total };
 }
 
 async function runJob(job: JobWithProject) {
-  const { args, outKey, totalSeconds } = await buildFfmpegArgs(job);
+  const { args, outKey, outPath, tmpDir, totalSeconds } = await buildFfmpegArgs(job);
 
   const child = spawn("ffmpeg", args, { stdio: ["ignore", "pipe", "pipe"] });
 
@@ -169,6 +166,14 @@ async function runJob(job: JobWithProject) {
   if (exitCode !== 0) {
     throw new Error(`FFmpeg failed (code ${exitCode}). ${stderr}`);
   }
+
+  const bytes = await fs.readFile(outPath);
+  await rendersStorage.putFile({
+    key: outKey,
+    bytes,
+    contentType: contentTypeFromKey(outKey),
+  });
+  await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => undefined);
 
   await prisma.renderJob.update({
     where: { id: job.id },

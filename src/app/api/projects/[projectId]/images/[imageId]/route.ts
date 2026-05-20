@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import fs from "node:fs/promises";
-import { createReadStream } from "node:fs";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { serveStorageObject } from "@/lib/storage/serve";
 import { uploadsStorage } from "@/lib/storage/storage";
 
 export async function GET(_: Request, ctx: { params: Promise<{ projectId: string; imageId: string }> }) {
@@ -19,24 +18,7 @@ export async function GET(_: Request, ctx: { params: Promise<{ projectId: string
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const filePath = uploadsStorage.resolvePath(img.storageKey);
-  const stat = await fs.stat(filePath).catch(() => null);
-  if (!stat) return NextResponse.json({ error: "Missing file" }, { status: 404 });
-
-  // best-effort content-type from extension
-  const ct = img.storageKey.endsWith(".png")
-    ? "image/png"
-    : img.storageKey.endsWith(".webp")
-      ? "image/webp"
-      : "image/jpeg";
-  const stream = createReadStream(filePath);
-
-  return new Response(stream as unknown as ReadableStream, {
-    headers: {
-      "content-type": ct,
-      "content-length": String(stat.size),
-      "cache-control": "private, max-age=0, must-revalidate",
-    },
+  return serveStorageObject(uploadsStorage, img.storageKey, {
+    cacheControl: "private, max-age=3600",
   });
 }
-

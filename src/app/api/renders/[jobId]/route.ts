@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import fs from "node:fs/promises";
-import { createReadStream } from "node:fs";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { serveStorageObject } from "@/lib/storage/serve";
 import { rendersStorage } from "@/lib/storage/storage";
 
 export async function GET(_: Request, ctx: { params: Promise<{ jobId: string }> }) {
@@ -14,19 +13,11 @@ export async function GET(_: Request, ctx: { params: Promise<{ jobId: string }> 
   if (!job || job.project.userId !== u.userId) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (job.status !== "done" || !job.outputKey) return NextResponse.json({ error: "Not ready" }, { status: 409 });
 
-  const filePath = rendersStorage.resolvePath(job.outputKey);
-  const stat = await fs.stat(filePath).catch(() => null);
-  if (!stat) return NextResponse.json({ error: "Missing file" }, { status: 404 });
+  const filename = `${job.project.title.replace(/[^a-z0-9-_]+/gi, "-")}.${job.format}`;
 
-  const contentType = job.format === "webm" ? "video/webm" : "video/mp4";
-  const stream = createReadStream(filePath);
-
-  return new Response(stream as unknown as ReadableStream, {
-    headers: {
-      "content-type": contentType,
-      "content-length": String(stat.size),
-      "content-disposition": `attachment; filename="${job.project.title.replace(/[^a-z0-9-_]+/gi, "-")}.${job.format}"`,
-    },
+  return serveStorageObject(rendersStorage, job.outputKey, {
+    cacheControl: "private, max-age=3600",
+    contentDisposition: `attachment; filename="${filename}"`,
+    attachment: true,
   });
 }
-
