@@ -2,7 +2,8 @@
 FROM node:22-bookworm-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --omit=optional
+# Do not use --omit=optional: Tailwind/lightningcss needs linux native bindings at build time.
+RUN npm ci
 
 FROM node:22-bookworm-slim AS builder
 WORKDIR /app
