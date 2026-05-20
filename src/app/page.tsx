@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { clearImages, putImages, type StoredImage } from "@/lib/imageStore";
@@ -81,13 +82,32 @@ export default function UploadPage() {
         <div className="glass-strong perspective-1200 mx-auto overflow-hidden rounded-3xl">
           <div className="flex flex-col gap-10 px-7 py-10 sm:px-10">
             <header className="flex flex-col gap-4">
-              <p className="text-xs tracking-[0.24em] text-[color:var(--fg1)]">CINEMATIC STORY ENGINE</p>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs tracking-[0.24em] text-[color:var(--fg1)]">CINEMATIC STORY ENGINE</p>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href="/login"
+                    className="rounded-full bg-[linear-gradient(90deg,var(--accent0),var(--accent1))] px-5 py-2.5 text-sm font-semibold text-black gpu"
+                  >
+                    Login / Sign up
+                  </Link>
+                  <Link
+                    href="/dashboard"
+                    className="rounded-full border border-white/15 bg-white/8 px-5 py-2.5 text-sm text-white/90 gpu"
+                  >
+                    Dashboard
+                  </Link>
+                </div>
+              </div>
               <h1 className="text-balance text-3xl font-semibold leading-tight sm:text-5xl">
                 Upload images. Get a premium, GPU-accelerated scrolling film.
               </h1>
               <p className="max-w-2xl text-base leading-7 text-[color:var(--fg1)]">
-                This app auto-builds a cinematic presentation with parallax depth, Ken Burns motion, sticky scenes, and
-                Apple-style transitions—optimized for 60FPS+ using transforms + opacity only.
+                Quick preview below works without an account. To save projects, export video, and share links — use{" "}
+                <Link href="/login" className="font-medium text-white underline underline-offset-4">
+                  Login
+                </Link>
+                .
               </p>
             </header>
 
