@@ -1,8 +1,20 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg0: #05060a;
+  --bg1: #070915;
+  --fg0: #e9eefc;
+  --fg1: #b7c2e6;
+  --glass: rgba(12, 14, 28, 0.55);
+  --glass-strong: rgba(12, 14, 28, 0.72);
+  --stroke: rgba(255, 255, 255, 0.10);
+  --shadow: rgba(0, 0, 0, 0.55);
+  --accent0: #7c5cff;
+  --accent1: #00d4ff;
+  --accent2: #ff3d8d;
+  --background: var(--bg0);
+  --foreground: var(--fg0);
 }
 
 @theme inline {
@@ -12,15 +24,58 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: radial-gradient(1200px 800px at 15% 15%, rgba(124, 92, 255, 0.16), transparent 60%),
+    radial-gradient(1000px 700px at 85% 30%, rgba(0, 212, 255, 0.12), transparent 55%),
+    radial-gradient(1000px 800px at 50% 110%, rgba(255, 61, 141, 0.10), transparent 55%),
+    linear-gradient(180deg, var(--bg1), var(--bg0));
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  text-rendering: geometricPrecision;
 }
 
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  height: 100%;
+}
+
+html {
+  scroll-behavior: auto;
+  overscroll-behavior: none;
+}
+
+/* GPU-first primitives */
+.gpu {
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.gpu-opacity {
+  will-change: opacity;
+}
+
+.perspective-1200 {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--stroke);
+  box-shadow: 0 20px 50px var(--shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-strong {
+  background: var(--glass-strong);
+  border: 1px solid var(--stroke);
+  box-shadow: 0 22px 60px var(--shadow);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+::selection {
+  background: rgba(124, 92, 255, 0.35);
 }
