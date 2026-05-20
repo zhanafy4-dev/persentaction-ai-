@@ -2,8 +2,8 @@
 FROM node:22-bookworm-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-# Do not use --omit=optional: Tailwind/lightningcss needs linux native bindings at build time.
-RUN npm ci
+# Schema not copied yet — skip postinstall; prisma generate runs in builder after COPY.
+RUN npm ci --ignore-scripts
 
 FROM node:22-bookworm-slim AS builder
 WORKDIR /app
