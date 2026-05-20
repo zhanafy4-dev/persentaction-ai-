@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { StoredImage } from "@/lib/imageStore";
 import { ensureGsap } from "@/lib/gsap";
 import { MotionOverlay } from "./MotionOverlay";
 import { CinematicImage } from "./CinematicImage";
@@ -21,9 +20,16 @@ function labelFromName(name: string) {
   return base.length > 0 ? base : name;
 }
 
+export type PresentationImage = {
+  id: string;
+  name: string;
+  dataUrl: string;
+  description?: string;
+};
+
 type SlideCopy = { eyebrow: string; title: string; subtitle?: string };
 
-function buildCopy(images: StoredImage[]): SlideCopy[] {
+function buildCopy(images: PresentationImage[]): SlideCopy[] {
   return images.map((img, i) => ({
     eyebrow: `SLIDE ${String(i + 1).padStart(2, "0")}`,
     title: labelFromName(img.name),
@@ -33,7 +39,7 @@ function buildCopy(images: StoredImage[]): SlideCopy[] {
   }));
 }
 
-export function ScrollSequence({ images }: { images: StoredImage[] }) {
+export function ScrollSequence({ images }: { images: PresentationImage[] }) {
   const copy = useMemo(() => buildCopy(images), [images]);
   const [visibleIndex, setVisibleIndex] = useState(0);
 
