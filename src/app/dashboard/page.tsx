@@ -30,9 +30,9 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div className="min-h-screen w-full px-6 py-16">
+    <div className="min-h-screen w-full px-4 py-10 pb-safe sm:px-6 sm:py-16">
       <div className="mx-auto w-full max-w-6xl">
-        <div className="flex items-end justify-between gap-4">
+        <div className="flex flex-col items-stretch justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <div className="text-xs tracking-[0.24em] text-white/60">DASHBOARD</div>
             <h1 className="mt-2 text-3xl font-semibold text-white">Your projects</h1>

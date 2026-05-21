@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createLenis } from "@/lib/lenis";
+import { usePrefersNativeScroll } from "@/lib/use-prefers-native-scroll";
 import { ensureGsap } from "@/lib/gsap";
 import { LenisProvider } from "./LenisContext";
 import type { LenisInstance } from "@/lib/lenis";
@@ -10,6 +11,7 @@ export function SmoothContainer({ children }: { children: React.ReactNode }) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [mounted, setMounted] = useState(false);
   const [lenis, setLenis] = useState<LenisInstance | null>(null);
+  const prefersNativeScroll = usePrefersNativeScroll();
 
   const { gsap, ScrollTrigger } = useMemo(() => ensureGsap(), []);
 
@@ -18,18 +20,15 @@ export function SmoothContainer({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || prefersNativeScroll) return;
 
     const reduce =
       typeof window !== "undefined" &&
-      window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
     if (reduce) return;
 
     const lenis = createLenis();
     setLenis(lenis);
-    // Lenis + GSAP: drive Lenis from the same ticker as GSAP (ms clock).
-    // See: https://github.com/darkroomengineering/lenis#gsap-scrolltrigger
     gsap.ticker.lagSmoothing(0);
     const onGsapTick = (timeSeconds: number) => {
       lenis.raf(timeSeconds * 1000);
@@ -41,23 +40,32 @@ export function SmoothContainer({ children }: { children: React.ReactNode }) {
     };
     lenis.on("scroll", onScroll);
 
+    const resize = () => lenis.resize();
+    window.addEventListener("resize", resize);
+    const ro = new ResizeObserver(() => lenis.resize());
+    if (rootRef.current) ro.observe(rootRef.current);
+
     return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", resize);
       lenis.off("scroll", onScroll);
       gsap.ticker.remove(onGsapTick);
       lenis.destroy();
       setLenis(null);
     };
-  }, [gsap, ScrollTrigger, mounted]);
+  }, [gsap, ScrollTrigger, mounted, prefersNativeScroll]);
 
-  // Note: We intentionally keep native scroll (Lenis enhances it).
-  // This preserves browser optimizations, avoids scrollerProxy complexity,
-  // and keeps ScrollTrigger stable while still rendering ultra-smooth motion.
+  useEffect(() => {
+    if (!prefersNativeScroll) return;
+    document.documentElement.classList.add("native-scroll");
+    return () => document.documentElement.classList.remove("native-scroll");
+  }, [prefersNativeScroll]);
+
   return (
-    <LenisProvider lenis={lenis}>
-      <div ref={rootRef} className="min-h-screen w-full">
+    <LenisProvider lenis={prefersNativeScroll ? null : lenis}>
+      <div ref={rootRef} className="w-full overflow-x-clip">
         {children}
       </div>
     </LenisProvider>
   );
 }
-

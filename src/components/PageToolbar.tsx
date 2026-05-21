@@ -8,7 +8,7 @@ type PageToolbarProps = {
 
 export function PageToolbar({ title, subtitle, children }: PageToolbarProps) {
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-[rgba(5,6,12,0.88)] backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[rgba(5,6,12,0.88)] pt-safe backdrop-blur-md">
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <div

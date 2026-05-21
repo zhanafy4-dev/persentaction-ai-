@@ -20,6 +20,12 @@ export const metadata: Metadata = {
   description: "GPU-accelerated cinematic scroll storytelling.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,9 +34,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} min-h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full overflow-x-clip">
         <Providers>
           <SiteChrome>
             <SmoothContainer>{children}</SmoothContainer>

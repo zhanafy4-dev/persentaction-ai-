@@ -95,7 +95,7 @@ export function VideoRenderPanel({
   return (
     <>
       {isDone && (
-        <div className="fixed bottom-0 left-0 right-0 z-[200] border-t border-white/15 bg-black/90 px-4 py-4 backdrop-blur-md">
+        <div className="fixed bottom-0 left-0 right-0 z-[200] border-t border-white/15 bg-black/90 px-4 py-4 pb-safe backdrop-blur-md">
           <div className="mx-auto flex max-w-6xl flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm text-white">
               <span className="font-semibold text-emerald-300">الفيديو جاهز!</span> اضغط لتحميله على جهازك.

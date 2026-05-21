@@ -37,8 +37,8 @@ export function AppNav() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/40 pt-safe backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-6">
         <Link href="/dashboard" className="text-sm font-semibold tracking-wide text-white/90 gpu">
           Cinematic Story
         </Link>

@@ -34,9 +34,9 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
   }));
 
   return (
-    <div className="min-h-screen w-full">
-      <div className="fixed left-0 right-0 top-0 z-50">
-        <div className="mx-auto w-full max-w-6xl px-4 pt-4 sm:px-8">
+    <div className="min-h-screen w-full pb-safe">
+      <div className="fixed left-0 right-0 top-0 z-50 pt-safe">
+        <div className="mx-auto w-full max-w-6xl px-4 pt-3 sm:px-6 sm:pt-4 md:px-8">
           <div className="glass flex items-center justify-between gap-3 rounded-2xl px-4 py-3">
             <div className="flex flex-col leading-tight">
               <div className="text-sm font-semibold text-white">{project.title}</div>
@@ -56,6 +56,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
 
       <div className="h-20 sm:h-24" />
       <ScrollSequence images={images} />
+      <div className="h-8 w-full shrink-0" aria-hidden />
     </div>
   );
 }

@@ -49,7 +49,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-full px-6 py-16 flex items-center justify-center">
+    <div className="flex min-h-screen w-full items-center justify-center px-4 py-10 pb-safe sm:px-6 sm:py-16">
       <div className="glass-strong w-full max-w-md rounded-3xl p-8">
         <div className="text-xs tracking-[0.24em] text-white/60">CINEMATIC STORY</div>
         <h1 className="mt-2 text-2xl font-semibold text-white">

@@ -116,9 +116,7 @@ export function DynamicPresentation({ images }: Props) {
       <GPUScene className="border-b border-white/6">
         <div
           ref={stageRef}
-          className="relative min-h-dvh w-full overflow-hidden gpu"
-          data-lenis-prevent-touch
-          data-lenis-prevent-wheel
+          className="relative w-full min-h-0 overflow-visible gpu max-md:touch-pan-y md:min-h-dvh md:overflow-hidden"
         >
           <div className="pointer-events-none absolute inset-0 -z-10">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_100%,rgba(6,8,18,0.95),rgba(5,6,12,1))]" />
@@ -126,7 +124,7 @@ export function DynamicPresentation({ images }: Props) {
             <div className="absolute inset-0 bg-[radial-gradient(700px_460px_at_88%_35%,rgba(0,212,255,0.10),transparent_55%)] gpu" />
           </div>
 
-          <div className="pointer-events-none relative z-10 flex min-h-dvh flex-col px-4 pb-10 pt-6 sm:px-8">
+          <div className="pointer-events-none relative z-10 flex min-h-0 flex-col px-4 pb-safe pt-6 sm:px-6 md:min-h-dvh md:pb-10 md:px-8">
             <div className="flex shrink-0 flex-wrap justify-end gap-2 pointer-events-auto">
               <span className="rounded-full border border-white/15 bg-black/40 px-3 py-2 text-[10px] tracking-wide text-white/55">
                 Dynamic engine
@@ -147,16 +145,16 @@ export function DynamicPresentation({ images }: Props) {
               </button>
             </div>
 
-            <div className="relative flex min-h-0 flex-1 items-center justify-center py-6">
+            <div className="relative flex min-h-0 max-md:flex-none flex-1 items-center justify-center py-4 sm:py-6">
               <div className="relative w-full max-w-6xl">
                 <div
                   ref={layoutRootRef}
                   className="pe-layout-root"
                   data-layout="split-right"
                 >
-                  <div ref={textPanelRef} className="pe-text glass-strong rounded-3xl p-6 sm:p-8">
+                  <div ref={textPanelRef} className="pe-text glass-strong rounded-3xl p-5 sm:p-6 md:p-8">
                     <p data-eye className="text-[11px] font-medium tracking-[0.22em] text-white/60" />
-                    <h2 data-title className="mt-2 text-balance text-2xl font-semibold text-white sm:text-4xl" />
+                    <h2 data-title className="mt-2 text-balance text-xl font-semibold text-white sm:text-3xl md:text-4xl" />
                     <p data-sub className="mt-3 text-pretty text-sm leading-relaxed text-white/72 sm:text-base" />
                   </div>
 

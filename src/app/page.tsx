@@ -71,7 +71,7 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center px-5 py-16">
+    <div className="relative flex min-h-screen w-full items-center justify-center px-4 py-10 pb-safe sm:px-6 sm:py-16">
       <div className="pointer-events-none absolute inset-0 opacity-80">
         <div className="absolute left-1/2 top-[-20%] h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(124,92,255,0.28),transparent_60%)] blur-3xl gpu" />
         <div className="absolute left-[10%] top-[55%] h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle_at_center,rgba(0,212,255,0.18),transparent_60%)] blur-3xl gpu" />

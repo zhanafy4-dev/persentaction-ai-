@@ -52,7 +52,7 @@ export default function PresentationPage() {
   }, [images, hasImages]);
 
   return (
-    <div className="min-h-screen w-full">
+    <div className="min-h-screen w-full pb-safe">
       <PageToolbar title="Cinematic Presentation" subtitle={subtitle}>
         <ToolbarLink href="/">رفع صور</ToolbarLink>
         <ToolbarLink href="/dashboard">لوحة التحكم</ToolbarLink>
@@ -81,7 +81,10 @@ export default function PresentationPage() {
           </div>
         </div>
       ) : (
-        <ScrollSequence images={images} variant="dynamic" />
+        <>
+          <ScrollSequence images={images} variant="dynamic" />
+          <div className="h-8 w-full shrink-0" aria-hidden />
+        </>
       )}
     </div>
   );

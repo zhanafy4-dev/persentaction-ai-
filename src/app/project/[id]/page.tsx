@@ -45,7 +45,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   }));
 
   return (
-    <div className="min-h-screen w-full">
+    <div className="min-h-screen w-full pb-safe">
       <PageToolbar title={project.title} subtitle={`${project.images.length} images`}>
         <ToolbarLink href="/dashboard">لوحة التحكم</ToolbarLink>
         <ToolbarLink href="/">رفع صور</ToolbarLink>
@@ -54,7 +54,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         </ToolbarLink>
       </PageToolbar>
 
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-8 sm:py-10">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-6 pb-28 sm:gap-6 sm:px-6 sm:py-8 md:pb-10">
         <VideoRenderPanel
           projectId={project.id}
           projectTitle={project.title}
@@ -78,6 +78,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       </div>
 
       <ScrollSequence images={imagesForPreview} variant="dynamic" />
+      <div className="h-8 w-full shrink-0 md:h-4" aria-hidden />
     </div>
   );
 }

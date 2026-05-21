@@ -226,8 +226,11 @@ function ClassicScrollSequence({ images }: { images: PresentationImage[] }) {
 
   return (
     <div ref={rootRef} className="w-full">
-      <section className="relative isolate w-full overflow-hidden border-b border-white/6 [contain:inline-size] perspective-1200">
-        <div ref={stageRef} className="relative min-h-dvh w-full overflow-hidden gpu" data-lenis-prevent-touch data-lenis-prevent-wheel>
+      <section className="relative isolate w-full max-md:overflow-visible border-b border-white/6 perspective-1200 max-md:[contain:none] md:overflow-hidden md:[contain:inline-size]">
+        <div
+          ref={stageRef}
+          className="relative w-full min-h-0 overflow-visible gpu max-md:touch-pan-y md:min-h-dvh md:overflow-hidden md:[touch-action:pan-y]"
+        >
           {/* Full-page cinematic background */}
           <div className="pointer-events-none absolute inset-0 -z-10">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_100%,rgba(6,8,18,0.95),rgba(5,6,12,1))]" />
@@ -237,7 +240,7 @@ function ClassicScrollSequence({ images }: { images: PresentationImage[] }) {
             <div className="absolute inset-0 opacity-[0.07] mix-blend-overlay [background-image:repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,255,255,0.04)_2px,rgba(255,255,255,0.04)_3px)]" />
           </div>
 
-          <div className="pointer-events-none relative z-10 flex min-h-dvh flex-col px-4 pb-10 pt-6 sm:px-8 md:pb-14">
+          <div className="pointer-events-none relative z-10 flex min-h-0 flex-col px-4 pb-safe pt-6 sm:px-6 md:min-h-dvh md:pb-14 md:px-8">
             <div className="flex shrink-0 flex-wrap justify-end gap-2 pointer-events-auto">
               <button type="button" onClick={togglePlay} className="rounded-full border border-white/15 bg-black/40 px-4 py-2 text-xs font-medium text-white/90 backdrop-blur-md transition-colors hover:bg-white/10 gpu">
                 إيقاف / تشغيل
@@ -248,58 +251,49 @@ function ClassicScrollSequence({ images }: { images: PresentationImage[] }) {
             </div>
 
             {/* Fixed presentation stage: LEFT region and RIGHT region (we crossfade between them) */}
-            <div className="relative flex min-h-0 flex-1 items-center justify-center py-6 sm:py-10">
+            <div className="relative flex min-h-0 max-md:flex-none flex-1 items-center justify-center py-4 sm:py-8 md:py-10">
               <div className="relative w-full max-w-6xl">
-                <div className="grid grid-cols-12 items-center gap-6 md:gap-10">
-                  {/* LEFT TEXT (for RIGHT image slides) */}
-                  <div className="col-span-12 md:col-span-5">
-                    <div ref={textLRef} className="glass-strong rounded-3xl p-6 sm:p-8">
+                <div className="grid grid-cols-12 items-center gap-4 md:gap-10">
+                  <div className="relative col-span-12 min-h-[8.5rem] md:col-span-5 md:min-h-0">
+                    <div
+                      ref={textLRef}
+                      className="glass-strong w-full rounded-3xl p-5 sm:p-6 md:relative md:p-8 max-md:absolute max-md:inset-0"
+                    >
                       <p data-eye className="text-[11px] font-medium tracking-[0.22em] text-white/60" />
-                      <h2 data-title className="mt-2 text-balance text-2xl font-semibold text-white sm:text-4xl" />
+                      <h2 data-title className="mt-2 text-balance text-xl font-semibold text-white sm:text-3xl md:text-4xl" />
+                      <p data-sub className="mt-3 text-pretty text-sm leading-relaxed text-white/72 sm:text-base" />
+                    </div>
+                    <div
+                      ref={textRRef}
+                      className="glass-strong w-full rounded-3xl p-5 sm:p-6 md:relative md:p-8 max-md:absolute max-md:inset-0"
+                    >
+                      <p data-eye className="text-[11px] font-medium tracking-[0.22em] text-white/60" />
+                      <h2 data-title className="mt-2 text-balance text-xl font-semibold text-white sm:text-3xl md:text-4xl" />
                       <p data-sub className="mt-3 text-pretty text-sm leading-relaxed text-white/72 sm:text-base" />
                     </div>
                   </div>
 
-                  {/* RIGHT FRAME */}
                   <div className="col-span-12 md:col-span-7">
                     <div
-                      ref={frameRRef}
-                      className="relative ml-auto w-full max-w-3xl overflow-hidden rounded-[clamp(1rem,3vw,1.75rem)] border border-white/12 bg-black/40 shadow-[0_24px_80px_rgba(0,0,0,0.55),0_0_0_1px_rgba(255,255,255,0.05)_inset] gpu aspect-[16/10] max-h-[min(52vh,680px)]"
+                      className="relative mx-auto aspect-[16/10] w-full max-w-3xl max-h-[min(56vh,680px)] overflow-hidden rounded-[clamp(1rem,3vw,1.75rem)] border border-white/12 bg-black/40 shadow-[0_24px_80px_rgba(0,0,0,0.55)] gpu"
                       style={{ transform: "translateZ(0)" }}
                     >
-                      <div className="absolute inset-0 overflow-hidden rounded-[inherit]">
+                      <div
+                        ref={frameRRef}
+                        className="absolute inset-0 overflow-hidden rounded-[inherit]"
+                      >
                         <CinematicImage ref={imgRRef} src={images[0]?.dataUrl ?? ""} alt={images[0]?.description?.trim() || "Slide 1"} priority className="opacity-100 object-cover" />
                         <div ref={overlayRRef} className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(255,255,255,0.05),transparent_58%)] opacity-65 gpu-opacity" />
                         <MotionOverlay />
                       </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-8 hidden md:block" />
-
-                <div className="grid grid-cols-12 items-center gap-6 md:gap-10">
-                  {/* LEFT FRAME */}
-                  <div className="col-span-12 md:col-span-7">
-                    <div
-                      ref={frameLRef}
-                      className="relative mr-auto w-full max-w-3xl overflow-hidden rounded-[clamp(1rem,3vw,1.75rem)] border border-white/12 bg-black/40 shadow-[0_24px_80px_rgba(0,0,0,0.55),0_0_0_1px_rgba(255,255,255,0.05)_inset] gpu aspect-[16/10] max-h-[min(52vh,680px)]"
-                      style={{ transform: "translateZ(0)" }}
-                    >
-                      <div className="absolute inset-0 overflow-hidden rounded-[inherit]">
+                      <div
+                        ref={frameLRef}
+                        className="absolute inset-0 overflow-hidden rounded-[inherit]"
+                      >
                         <CinematicImage ref={imgLRef} src={images[1]?.dataUrl ?? images[0]?.dataUrl ?? ""} alt={images[1]?.description?.trim() || images[0]?.description?.trim() || "Slide 2"} priority className="opacity-100 object-cover" />
                         <div ref={overlayLRef} className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(255,255,255,0.05),transparent_58%)] opacity-65 gpu-opacity" />
                         <MotionOverlay />
                       </div>
-                    </div>
-                  </div>
-
-                  {/* RIGHT TEXT (for LEFT image slides) */}
-                  <div className="col-span-12 md:col-span-5">
-                    <div ref={textRRef} className="glass-strong rounded-3xl p-6 sm:p-8">
-                      <p data-eye className="text-[11px] font-medium tracking-[0.22em] text-white/60" />
-                      <h2 data-title className="mt-2 text-balance text-2xl font-semibold text-white sm:text-4xl" />
-                      <p data-sub className="mt-3 text-pretty text-sm leading-relaxed text-white/72 sm:text-base" />
                     </div>
                   </div>
                 </div>

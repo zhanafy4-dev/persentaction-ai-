@@ -34,14 +34,49 @@ body {
   text-rendering: geometricPrecision;
 }
 
-html,
-body {
-  height: 100%;
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: auto;
+  overflow-x: clip;
 }
 
-html {
-  scroll-behavior: auto;
-  overscroll-behavior: none;
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  overflow-x: clip;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Lenis off on mobile/tablet — native scroll must reach full document height */
+html.native-scroll,
+html.native-scroll body {
+  height: auto;
+  min-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior-y: auto;
+}
+
+html.native-scroll {
+  scroll-padding-bottom: max(5rem, env(safe-area-inset-bottom, 0px));
+}
+
+.pb-safe {
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+}
+
+.pt-safe {
+  padding-top: max(0px, env(safe-area-inset-top, 0px));
+}
+
+.touch-target {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* GPU-first primitives */
