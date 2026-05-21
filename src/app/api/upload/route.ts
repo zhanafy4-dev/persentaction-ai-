@@ -45,32 +45,47 @@ export async function POST(req: Request) {
   });
   let order = (last?.order ?? 0) + 1;
 
-  const created = await prisma.$transaction(async (tx) => {
-    const out = [];
-    for (let i = 0; i < files.length; i++) {
-      const f = files[i]!;
-      const bytes = Buffer.from(await f.arrayBuffer());
-      const id = crypto.randomUUID();
-      const ext = extFromMime(f.type);
-      const key = path.join(u.userId, project.id, `${id}.${ext}`).replace(/\\/g, "/");
-      await uploadsStorage.putFile({ key, bytes, contentType: f.type });
+  try {
+    const created = await prisma.$transaction(async (tx) => {
+      const out = [];
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i]!;
+        const bytes = Buffer.from(await f.arrayBuffer());
+        const id = crypto.randomUUID();
+        const ext = extFromMime(f.type);
+        const key = path.join(u.userId, project.id, `${id}.${ext}`).replace(/\\/g, "/");
+        await uploadsStorage.putFile({ key, bytes, contentType: f.type });
 
-      const img = await tx.projectImage.create({
-        data: {
-          id,
-          projectId: project.id,
-          order,
-          originalName: f.name,
-          storageKey: key,
-          description: (descriptions[i] ?? "").slice(0, 2000),
-        },
-      });
-      order += 1;
-      out.push(img);
-    }
-    return out;
-  });
+        const img = await tx.projectImage.create({
+          data: {
+            id,
+            projectId: project.id,
+            order,
+            originalName: f.name,
+            storageKey: key,
+            description: (descriptions[i] ?? "").slice(0, 2000),
+          },
+        });
+        order += 1;
+        out.push(img);
+      }
+      return out;
+    });
 
-  return NextResponse.json({ projectId: project.id, images: created });
+    return NextResponse.json({ projectId: project.id, images: created });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Upload failed";
+    // eslint-disable-next-line no-console
+    console.error("[upload]", e);
+    const isStorage = /cloudinary|storage|Missing CLOUDINARY/i.test(msg);
+    return NextResponse.json(
+      {
+        error: isStorage
+          ? "فشل التخزين. تأكد من إعداد Cloudinary على السيرفر (CLOUDINARY_*)."
+          : msg.slice(0, 500),
+      },
+      { status: 500 },
+    );
+  }
 }
 
