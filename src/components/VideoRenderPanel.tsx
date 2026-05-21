@@ -116,7 +116,7 @@ export function VideoRenderPanel({
         <div className="text-xs tracking-[0.24em] text-white/60">VIDEO EXPORT</div>
         <h2 className="mt-2 text-xl font-semibold text-white">تصدير وتحميل الفيديو</h2>
         <p className="mt-1 text-sm text-white/65">
-          1) Render MP4 — 2) انتظر done — 3) تحميل الفيديو (Worker على Railway)
+          1) Render MP4 — 2) انتظر done — 3) تحميل الفيديو (Worker على Railway). النصوص تظهر في العرض على الموقع؛ الفيديو = صور متحركة فقط.
         </p>
 
         <div className="mt-4 flex flex-wrap gap-2">

@@ -16,15 +16,6 @@ function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-function escapeDrawtext(text: string) {
-  // FFmpeg drawtext escaping: escape backslash, colon, apostrophe, percent.
-  return text
-    .replace(/\\/g, "\\\\")
-    .replace(/:/g, "\\:")
-    .replace(/'/g, "\\'")
-    .replace(/%/g, "\\%");
-}
-
 async function claimJob(): Promise<JobWithProject | null> {
   return prisma.$transaction(async (tx) => {
     const job = await tx.renderJob.findFirst({
@@ -62,37 +53,34 @@ async function buildFfmpegArgs(job: JobWithProject) {
     args.push("-loop", "1", "-t", String(seg), "-i", p);
   }
 
-  // Filter: create per-image zoompan stream, add drawtext overlay, then xfade chain.
+  // Ken Burns per slide (no drawtext — Arabic/Unicode breaks FFmpeg in Docker without fonts).
+  const framesPerSeg = Math.max(1, Math.round(seg * fps));
   const filters: string[] = [];
   for (let i = 0; i < images.length; i++) {
-    const side = i % 2 === 0 ? "R" : "L";
-    const desc = escapeDrawtext(images[i]!.description || "");
-    const x = side === "R" ? "(w*0.58)" : "(w*0.08)";
-    const y = "(h*0.74)";
-
-    // zoompan: mild zoom-in
-    // Use scale to target size then zoompan to avoid aspect mismatch issues.
+    const kbDir = i % 2 === 0 ? 1 : -1;
     filters.push(
-      `[${i}:v]scale=${w}:${h}:force_original_aspect_ratio=increase,crop=${w}:${h},` +
-        `zoompan=z='min(1.08,1.0+0.0008*n)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=${Math.round(
-          seg * fps,
-        )}:fps=${fps},format=yuv420p` +
-        (desc
-          ? `,drawtext=text='${desc}':x=${x}:y=${y}:fontsize=42:fontcolor=white@0.90:box=1:boxcolor=black@0.35:boxborderw=18`
-          : "") +
-        `[v${i}]`,
+      `[${i}:v]format=yuv420p,scale=${w}:${h}:force_original_aspect_ratio=increase:flags=lanczos,` +
+        `crop=${w}:${h},` +
+        `zoompan=z='min(1.08,1+0.0006*n)':x='iw/2-(iw/zoom/2)+${kbDir * 12}':y='ih/2-(ih/zoom/2)':` +
+        `d=${framesPerSeg}:s=${w}x${h}:fps=${fps},format=yuv420p[v${i}]`,
     );
   }
 
-  // xfade chain
   let chain = "[v0]";
-  for (let i = 1; i < images.length; i++) {
-    const offset = i * seg - cross; // when to start the crossfade
-    filters.push(`${chain}[v${i}]xfade=transition=fade:duration=${cross}:offset=${offset}[x${i}]`);
-    chain = `[x${i}]`;
+  if (images.length === 1) {
+    // single image — no xfade
+  } else {
+    const step = seg - cross;
+    for (let i = 1; i < images.length; i++) {
+      const offset = Number((i * step).toFixed(3));
+      filters.push(
+        `${chain}[v${i}]xfade=transition=fade:duration=${cross}:offset=${offset}[x${i}]`,
+      );
+      chain = `[x${i}]`;
+    }
   }
 
-  const filterComplex = [...filters].join(";");
+  const filterComplex = filters.join(";");
   args.push("-filter_complex", filterComplex);
   args.push("-map", chain);
 
@@ -164,7 +152,8 @@ async function runJob(job: JobWithProject) {
   });
 
   if (exitCode !== 0) {
-    throw new Error(`FFmpeg failed (code ${exitCode}). ${stderr}`);
+    const tail = stderr.slice(-3500);
+    throw new Error(`FFmpeg failed (code ${exitCode}). ${tail}`);
   }
 
   const bytes = await fs.readFile(outPath);
